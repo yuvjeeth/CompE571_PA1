@@ -3,9 +3,9 @@
 
 //timings for (n):10e8, 10e9, 10e10, 50 iterations for each, avg and std dev for each n
 //quick results for 1 iteration
-//10e8 - 4.764756
-//10e9 - 47.752732
-//10e10 - 586.044692
+//10e8 - 4.764756 (MacBook Neo - A18Pro - 8GB RAM)
+//10e9 - 47.752732 (MacBook Neo - A18Pro - 8GB RAM)
+//10e10 - 586.044692 (MacBook Neo - A18Pro - 8GB RAM)
 
 
 //We're using this helper function to convert int128 type to string
