@@ -1,11 +1,11 @@
 #include <stdio.h>
 #include <time.h>
 
-//timings for (n):10e8, 10e9, 10e10, 50 iterations for each, avg and std dev for each n
+//timings for (n):1e8, 1e9, 1e10, 50 iterations for each, avg and std dev for each n
 //quick results for 1 iteration
-//10e8 - 4.764756 (MacBook Neo - A18Pro - 8GB RAM)
-//10e9 - 47.752732 (MacBook Neo - A18Pro - 8GB RAM)
-//10e10 - 586.044692 (MacBook Neo - A18Pro - 8GB RAM)
+//1e8 -  (MacBook Neo - A18Pro - 8GB RAM)
+//1e9 -  (MacBook Neo - A18Pro - 8GB RAM)
+//1e10 -  (MacBook Neo - A18Pro - 8GB RAM)
 
 
 //We're using this helper function to convert int128 type to string
@@ -25,7 +25,6 @@ void print_u128(unsigned __int128 x) {
         buf[idx] = "0123456789"[x % 10];
         x /= 10;
     }
-
     printf("%s", &buf[idx]);
 }
 
@@ -33,7 +32,7 @@ int main(void)
 {
     struct timespec start, end;
     unsigned __int128 sum = 0; //This is because the 64bit variable overflows, so 128 bit
-	unsigned long n = 10e10, i = 0;
+	unsigned long n = 1e10, i = 0;
     printf("Launch sequence initiated!\n");
     clock_gettime(CLOCK_MONOTONIC, &start);
     while(i < n)
@@ -41,7 +40,7 @@ int main(void)
         sum += i;
         i++;
         //Uncomment this while debugging
-        // if(i % 100000000 == 0){
+        // if(i % 1000000 == 0){
         // printf("We're at %lu right now...\n",i);
         // }
     }
