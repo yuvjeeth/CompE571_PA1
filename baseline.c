@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
@@ -53,23 +54,27 @@ double businessLogic(unsigned long n)
     return elapsed;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-    unsigned long n = 1e8;
-    int i = 0, totalIter = 20;
+    unsigned long n = strtoul(argv[1], NULL, 10);
+    int totalIter = atoi(argv[2]);
+
     double elapsedTimes[totalIter];
-    for(i = 0; i < totalIter; i++){
+    for (int i = 0; i < totalIter; i++)
+    {
         printf("(%d)", i + 1);
         elapsedTimes[i] = businessLogic(n);
     }
 
     double mean = 0.0, standardDeviation = 0.0;
-    for(int iElapsedTimes = 0; iElapsedTimes < totalIter; iElapsedTimes++){
+    for (int iElapsedTimes = 0; iElapsedTimes < totalIter; iElapsedTimes++)
+    {
         mean += elapsedTimes[iElapsedTimes];
     }
     mean /= totalIter;
 
-    for(int iElapsedTimes = 0; iElapsedTimes < totalIter; iElapsedTimes++){
+    for (int iElapsedTimes = 0; iElapsedTimes < totalIter; iElapsedTimes++)
+    {
         standardDeviation += pow(elapsedTimes[iElapsedTimes] - mean, 2);
     }
     standardDeviation = sqrt(standardDeviation / totalIter);
