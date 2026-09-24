@@ -44,7 +44,7 @@ double businessLogic(unsigned long n, int NUM_TASKS)
 
     for (int p = 0; p < NUM_TASKS; p++)
     {
-        int pfds[2];
+        int pfds[2]; //This is the replacement for the dup function
         if (pipe(pfds) == -1)
         {
             perror("pipe");
@@ -72,6 +72,7 @@ double businessLogic(unsigned long n, int NUM_TASKS)
                 local_sum += i;
             }
 
+            //Here we write the partial sum to the pipe (so we don't want the dup function, this does that)
             if (write(pfds[1], &local_sum, sizeof(local_sum)) != (ssize_t)sizeof(local_sum))
                 _exit(1);
             close(pfds[1]);
