@@ -4,7 +4,7 @@
 #include <time.h>
 #define NUM_THREADS 4 
 
-//1st run sum-> 4999999999950000000000 and time elapsed: 0.000101
+//1st run 4999999999950000000000 Time elapsed: 115.000018
 
 
 //same helper as the baseline
