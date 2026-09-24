@@ -4,7 +4,6 @@
 #include <time.h>
 #include <math.h>
 
-//1st run 4999999999950000000000 Time elapsed: 115.000018
 
 
 //same helper as the baseline
