@@ -2,8 +2,9 @@
 #include<pthread.h>
 #include<stdlib.h>
 #include <time.h>
-#include <math.h>
+#define NUM_THREADS 4 
 
+//1st run 4999999999950000000000 Time elapsed: 115.000018
 
 
 //same helper as the baseline
@@ -39,11 +40,12 @@ unsigned __int128 local_sum=0;
     return NULL;
 }
 
-double businessLogic(unsigned long n, int NUM_THREADS) {
+int main (void){
     struct timespec start, end;
+    unsigned long n = 10e10;
     pthread_t threads[NUM_THREADS];
     thread_arg_t args[NUM_THREADS];
-    unsigned long chunk = n / NUM_THREADS;
+    unsigned long chunk=n / NUM_THREADS;
     clock_gettime(CLOCK_MONOTONIC, &start);
     for (int i=0;i<NUM_THREADS;i++){
         args[i].start = i * chunk;
@@ -52,41 +54,16 @@ double businessLogic(unsigned long n, int NUM_THREADS) {
         pthread_create(&threads[i], NULL, worker, &args[i]);
     }
     unsigned __int128 sum = 0;
-    for (int i = 0; i < NUM_THREADS; i++) {
+    for (int i=0;i<NUM_THREADS;i++){
         pthread_join(threads[i], NULL);
         sum += args[i].partial_sum;
     }
     clock_gettime(CLOCK_MONOTONIC, &end);
-    printf("Finished! The sum is ");
     print_u128(sum);
     printf("\n");
+
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     printf("Time elapsed: %0.6f\n", elapsed);
-    return elapsed;
-}
-
-int main (int argc, char *argv[]){
-    unsigned long n = strtoul(argv[1], NULL, 10);
-    int totalIter = atoi(argv[2]);
-    int NUM_THREADS = atoi(argv[3]);
-    double elapsedTimes[totalIter];
-    for (int i = 0; i < totalIter; i++) {
-        printf("(%d)", i + 1);
-        elapsedTimes[i] = businessLogic(n, NUM_THREADS);
-    }
-    double mean = 0.0, standardDeviation = 0.0;
-    for (int i = 0; i < totalIter; i++) {
-        mean += elapsedTimes[i];
-    }
-    mean /= totalIter;
-
-    for (int i = 0; i < totalIter; i++) {
-        standardDeviation += pow(elapsedTimes[i] - mean, 2);
-    }
-    standardDeviation = sqrt(standardDeviation / totalIter);
-
-    printf("Mean: %0.6f\n", mean);
-    printf("Standard Deviation: %0.6f\n", standardDeviation);
 
     return 0;
 }
