@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <time.h>
 #include <stdlib.h>
-#include <errno.h>
-#include <string.h>
 #include <sys/wait.h>
 #include <math.h>
 
-// The program re-runs itself from the current directory
-#define EXE_PATH "./multitask_popen"
+#define EXE_PATH "./baseline_parametrized"
 
 // We're using this helper function to convert int128 type to string
 // In order to print it to console
@@ -35,30 +32,6 @@ void print_u128(unsigned __int128 x)
 
 double businessLogic(unsigned long n, int NUM_TASKS)
 {
-    // Worker process
-    // the parent sets SUM_START and SUM_END variables in the environment
-    // and prints the 128-bit result as two 64-bit halves (hi lo) on stdout, which the parent reads through the popen() pipe.
-
-    const char *env_start = getenv("SUM_START");
-    const char *env_end = getenv("SUM_END");
-    if (env_start != NULL && env_end != NULL)
-    {
-        unsigned long start_i = strtoul(env_start, NULL, 10);
-        unsigned long end_i = strtoul(env_end, NULL, 10);
-        unsigned __int128 local_sum = 0;
-
-        for (unsigned long i = start_i; i < end_i; i++)
-        {
-            local_sum += i;
-        }
-
-        unsigned long long hi = (unsigned long long)(local_sum >> 64);
-        unsigned long long lo = (unsigned long long)local_sum;
-        printf("%llu %llu\n", hi, lo);
-        return 0.0;
-    }
-
-    //Parent process ONLY
     struct timespec start, end;
     unsigned __int128 sum = 0;
     unsigned long chunkSize = n / NUM_TASKS;
@@ -74,7 +47,7 @@ double businessLogic(unsigned long n, int NUM_TASKS)
         unsigned long end_i = (p == NUM_TASKS - 1) ? n : (p + 1) * chunkSize;
 
         char cmd[256];
-        snprintf(cmd, sizeof(cmd), "SUM_START=%lu SUM_END=%lu " EXE_PATH, start_i, end_i);
+        snprintf(cmd, sizeof(cmd), EXE_PATH " %lu %lu", start_i, end_i);
 
         //Print statements only for debugging
         //fprintf(stderr, "launching worker %d: %s\n", p, cmd);
@@ -92,42 +65,15 @@ double businessLogic(unsigned long n, int NUM_TASKS)
     for (int p = 0; p < NUM_TASKS; p++)
     {
         unsigned long long hi = 0, lo = 0;
-        int got;
-
-        while (1)
-        {
-            errno = 0;
-            got = fscanf(fps[p], "%llu %llu", &hi, &lo);
-            if (got == 2)
-                break;
-            if (ferror(fps[p]) && errno == EINTR) // interrupted by a signal, so try again
-            {
-                //We wanted to see what signal was interrupting the read and terminating the process, 
-                //same situation as fork implementation
-                //fprintf(stderr, "worker %d: read interrupted (EINTR), retrying\n", p); 
-                clearerr(fps[p]);
-                continue;
-            }
-            break;
-        }
-
-        int saw_eof = feof(fps[p]);
-        int saw_err = ferror(fps[p]);
-        int saved_errno = errno;
+        int got = fscanf(fps[p], "%llu %llu", &hi, &lo);
         int status = pclose(fps[p]); // waits for the worker and closes the pipe
 
-        //Print statements only for debugging
-        // if (got != 2)
-        // {
-        //     any_failed = 1;
-        //     fprintf(stderr, "worker %d: fscanf returned %d (eof=%d, error=%d, errno=%d: %s)\n",
-        //             p, got, saw_eof, saw_err, saved_errno, strerror(saved_errno));
-        //     if (WIFEXITED(status))
-        //         fprintf(stderr, "  worker exited with code %d\n", WEXITSTATUS(status));
-        //     else if (WIFSIGNALED(status))
-        //         fprintf(stderr, "  worker killed by signal %d\n", WTERMSIG(status));
-        //     continue;
-        // }
+        if (got != 2 || status == -1 || !WIFEXITED(status) || WEXITSTATUS(status) != 0)
+        {
+            any_failed = 1;
+            fprintf(stderr, "worker %d failed\n", p);
+            continue;
+        }
 
         sum += ((unsigned __int128)hi << 64) | lo;
     }
