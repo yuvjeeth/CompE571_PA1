@@ -4,7 +4,7 @@
 #include <sys/wait.h>
 #include <math.h>
 
-#define EXE_PATH "./baseline_parametrized"
+#define EXE_PATH "./baseline_parameterized"
 
 // We're using this helper function to convert int128 type to string
 // In order to print it to console
